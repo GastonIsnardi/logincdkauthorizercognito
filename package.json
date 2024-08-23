@@ -5,7 +5,7 @@
     "login": "bin/login.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cdk deploy --all",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
