@@ -1,29 +1,26 @@
-import { NestedStack, NestedStackProps } from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import * as fs from "fs";
-import { Config, LambdaConfig } from "./interfaces/interfaces";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { LambdaConstructProps } from "./interfaces/interfaces";
 
-interface lambdaStackProps extends NestedStackProps {}
+export class LambdaConstruct extends Construct {
+  public readonly lambdas: { [name: string]: lambda.Function } = {};
 
-export class LambdaStack extends NestedStack {
-  constructor(scope: Construct, id: string, props?: lambdaStackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string, props: LambdaConstructProps) {
+    super(scope, id);
 
-    // Cargar configuración desde el archivo JSON y tiparlo
-    const lambdaConfig: Config = JSON.parse(
-      fs.readFileSync("lib/stack/lambda/lambda-config.json", "utf-8")
-    );
-
-    // Crear las funciones Lambda a partir de la configuración
-    lambdaConfig.lambdas.forEach((lambdaItem: LambdaConfig) => {
-      new lambda.Function(this, lambdaItem.name, {
-        functionName: lambdaItem.name,
-        runtime: lambda.Runtime.NODEJS_LATEST,
+    props.lambdaConfig.forEach((lambdaItem) => {
+      // Crear la función Lambda
+      const lambdaFunction = new lambda.Function(this, lambdaItem.name, {
+        functionName: lambdaItem.name, // Especifica el nombre de la función
+        runtime: lambda.Runtime.NODEJS_LATEST, // runtime ya es asegurado que es un valor único de tipo Runtime
         code: lambda.Code.fromAsset(lambdaItem.codePath),
         handler: lambdaItem.handler,
         environment: lambdaItem.environment,
       });
+
+      // Almacena la función Lambda en un objeto para acceder más tarde
+      this.lambdas[lambdaItem.name] = lambdaFunction;
     });
   }
 }

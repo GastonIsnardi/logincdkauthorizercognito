@@ -1,10 +1,7 @@
-export interface LambdaConfig {
-  name: string;
-  handler: string;
-  codePath: string;
-  environment: { [key: string]: string };
-}
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { LambdaConfig } from "../../../interfaces/json";
+export type LambdaRuntime = keyof typeof lambda.Runtime;
 
-export interface Config {
-  lambdas: LambdaConfig[];
+export interface LambdaConstructProps {
+  lambdaConfig: LambdaConfig[];
 }

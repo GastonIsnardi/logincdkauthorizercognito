@@ -1,0 +1,55 @@
+{
+  "lambdas": [
+    {
+      "name": "healthCheck",
+      "handler": "healthCheck.handler",
+      "codePath": "src/healthCheck/",
+      "environment": {
+        "MY_ENV_VAR": "value1"
+      },
+      "apiGateway": {
+        "routes": [
+          {
+            "path": "/health-check",
+            "methods": ["GET"],
+            "authorizationType": "NONE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "healthCheck2",
+      "handler": "healthCheck.handler",
+      "codePath": "src/healthCheck/",
+      "environment": {
+        "MY_ENV_VAR": "value1"
+      },
+      "apiGateway": {
+        "routes": [
+          {
+            "path": "test/health-check",
+            "methods": ["GET"],
+            "authorizationType": "NONE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "healthCheck3",
+      "handler": "healthCheck.handler",
+      "codePath": "src/healthCheck/",
+      "environment": {
+        "MY_ENV_VAR": "value1"
+      },
+      "apiGateway": {
+        "routes": [
+          {
+            "path": "test/health-check2",
+            "methods": ["GET"],
+            "authorizationType": "NONE"
+          }
+        ]
+      }
+    }
+  ]
+}
