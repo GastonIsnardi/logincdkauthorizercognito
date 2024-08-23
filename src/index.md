@@ -8,3 +8,4 @@
 // TODO #7 crear lambda del logout
 // TODO #8 crear lambda del obtener usuario
 // TODO #9 crear lambda del actualizar usuario
+// TODO #10 crear prisma

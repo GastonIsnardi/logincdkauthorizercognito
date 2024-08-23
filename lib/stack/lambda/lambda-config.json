@@ -1,0 +1,12 @@
+{
+  "lambdas": [
+    {
+      "name": "MyFirstLambda",
+      "handler": "healthCheck.handler",
+      "codePath": "src/healthCheck/",
+      "environment": {
+        "MY_ENV_VAR": "value1"
+      }
+    }
+  ]
+}
