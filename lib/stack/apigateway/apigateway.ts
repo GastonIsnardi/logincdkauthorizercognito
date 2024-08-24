@@ -1,45 +1,54 @@
 import { Construct } from "constructs";
-import { ApiGatewayConstructProps } from "./interfaces/interfaces";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
-import { LambdaConfig } from "../../interfaces/json";
+import { ApiGatewayConstructProps } from "./interfaces/interfaces";
+import { CognitoConstruct } from "../cognito/cognito";
 
 export class ApiGatewayConstruct extends Construct {
   public readonly api: apigateway.RestApi;
 
-  constructor(scope: Construct, id: string, props: ApiGatewayConstructProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: ApiGatewayConstructProps,
+    cognitoConstruct: CognitoConstruct
+  ) {
     super(scope, id);
 
-    // Crear un API Gateway
     this.api = new apigateway.RestApi(this, "MyApi", {
       restApiName: "My Service API",
       description: "This service serves my Lambda functions.",
     });
 
-    // Crear un recurso para cada Lambda en el API Gateway usando la configuración desde JSON
-    props.config.forEach((lambdaConfig: LambdaConfig) => {
+    props.config.forEach((lambdaConfig) => {
       const lambdaFunction = props.lambdas[lambdaConfig.name];
 
       lambdaConfig.apiGateway?.routes.forEach((route) => {
         const resource = this.api.root.resourceForPath(route.path);
 
-        route.methods.forEach((method: string) => {
-          const lambdaIntegration = new apigateway.LambdaIntegration(
-            lambdaFunction,
+        // Declarar tipo de authorizer explícitamente
+        let authorizer: apigateway.IAuthorizer | undefined;
+
+        if (route.authorizationType === "COGNITO") {
+          authorizer = new apigateway.CognitoUserPoolsAuthorizer(
+            this,
+            `${lambdaConfig.name}Authorizer`,
             {
-              requestTemplates: {
-                "application/json": `{ "statusCode": "200" }`,
-              },
+              cognitoUserPools: [cognitoConstruct.userPool],
             }
           );
+        }
 
-          // Conversión explícita para asegurar el tipo
-          const authorizationType =
-            apigateway.AuthorizationType[
-              route.authorizationType as keyof typeof apigateway.AuthorizationType
-            ];
+        route.methods.forEach((method) => {
+          const lambdaIntegration = new apigateway.LambdaIntegration(
+            lambdaFunction
+          );
 
           resource.addMethod(method, lambdaIntegration, {
-            authorizationType: authorizationType,
+            authorizationType:
+              apigateway.AuthorizationType[
+                route.authorizationType as keyof typeof apigateway.AuthorizationType
+              ],
+            authorizer,
             requestParameters: route.requestParameters || {},
           });
         });
